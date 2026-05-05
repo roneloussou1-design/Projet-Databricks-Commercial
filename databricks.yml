@@ -1,14 +1,28 @@
 bundle:
   name: pipeline-commercial
 
-workspace:
-  host: https://adb-7405618938325203.3.azuredatabricks.net
+targets:
+  dev:
+    mode: development
+    workspace:
+      host: https://adb-7405618938325203.3.azuredatabricks.net
+    resources:
+      jobs:
+        pipeline_commercial_medallion:
+          name: "[DEV] pipeline-commercial-medallion"
+
+  prod:
+    mode: production
+    workspace:
+      host: https://adb-7405618938325203.3.azuredatabricks.net
+    resources:
+      jobs:
+        pipeline_commercial_medallion:
+          name: "[PROD] pipeline-commercial-medallion"
 
 resources:
   jobs:
     pipeline_commercial_medallion:
-      name: pipeline-commercial-medallion
-
       job_clusters:
         - job_cluster_key: shared_cluster
           new_cluster:

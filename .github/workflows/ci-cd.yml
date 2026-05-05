@@ -2,7 +2,7 @@ name: CI/CD Pipeline Commercial
 
 on:
   push:
-    branches: [master]
+    branches: [master, develop]
 
 jobs:
   tests:
@@ -15,16 +15,32 @@ jobs:
       - run: pip install -r requirements.txt
       - run: pytest tests/unit/ -v
 
-  deploy:
+  deploy-dev:
     needs: tests
     runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/develop'
     steps:
       - uses: actions/checkout@v4
       - name: Install Databricks CLI
         run: |
           curl -fsSL https://raw.githubusercontent.com/databricks/setup-cli/main/install.sh | sh
-      - name: Deploy Bundle
-        run: databricks bundle deploy
+      - name: Deploy to DEV
+        run: databricks bundle deploy --target dev
+        env:
+          DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
+          DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
+
+  deploy-prod:
+    needs: tests
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/master'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Databricks CLI
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/databricks/setup-cli/main/install.sh | sh
+      - name: Deploy to PROD
+        run: databricks bundle deploy --target prod
         env:
           DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
           DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
